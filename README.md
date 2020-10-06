@@ -69,6 +69,16 @@ mock "aws_vpcs" "selected" {
 }
 ```
 
+### Mock return values of resources
+
+Terraform code :
+```
+data "aws_vpcs" "selected" {
+  tags = {
+    service = "secure"
+  }
+}
+```
 
 
 ### Run 
@@ -93,9 +103,10 @@ The command line flag `--diplay-plan` can help to write your tests. As name sugg
 
 The examples given so far are really easy and can seem useless. However there a re situations where writing this kind of tests is really helpful :
 
-- When your configuration do tricky operations with terraform provided function like splitting a dns name to find the DNS zone to update, or doing computation on an IP address or subnet mask, ...
-- When your configuration may or may not create additionnal resources, depending on advanced conditions
+- When your configuration does tricky operations with terraform provided function like splitting a dns name to find the DNS zone to update, or doing computation on an IP address or subnet mask, ...
+- When your configuration may or may not create additional resources, depending on advanced conditions
 - When you want to check all your tags have been correctly merged and applied to your resources
+- When 
 - ...
 
 Also, as a module author, it can be interesting to ensure the new version of your module won't have side effects so users can update peacefully.

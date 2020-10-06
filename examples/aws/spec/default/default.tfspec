@@ -54,10 +54,21 @@ assert "module.ec2-instance.aws_instance" "this[0]" {
       }
 
       vpc_security_group_ids = ["123"]
-
 }
 
 refute "module.ec2-instance.aws_instance" "this[0]" {
   // TODO
   ebs_block_device{}
+}
+
+
+expect "aws_s3_bucket" "b" {
+  bucket = "my-tf-test-bucket"
+  return {
+    id = "arn:aws:s3::0000000000:my-tf-test-bucket"
+  }
+}
+
+assert "aws_s3_bucket" "b" {
+    id = "arn:aws:s3::0000000000:my-tf-test-bucket"
 }

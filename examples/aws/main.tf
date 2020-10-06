@@ -63,6 +63,15 @@ module "ec2-instance" {
   ebs_block_device = var.ebs_block_device
 }
 
+resource "aws_s3_bucket" "b" {
+  bucket = "my-tf-test-bucket"
+}
+
 output "private_ip" {
   value = module.ec2-instance.private_ip
 }
+
+output "bucket_id" {
+  value = aws_s3_bucket.b.id
+}
+
