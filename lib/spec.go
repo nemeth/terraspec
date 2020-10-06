@@ -68,6 +68,11 @@ func (a *Assert) Key() string {
 	return fmt.Sprintf("%s.%s", a.Type, a.Name)
 }
 
+// Key return fully qualified name of an Expect
+func (e *Expect) Key() string {
+	return fmt.Sprintf("%s.%s", e.Type, e.Name)
+}
+
 // Call marks the mock as called and returns its data
 func (m *Mock) Call() cty.Value {
 	m.calls++
@@ -111,12 +116,15 @@ func (s *Spec) Validate(plan *plans.Plan) (tfdiags.Diagnostics, error) {
 				diags = diags.Append(fmt.Errorf("Could not find resource %s in changes", assert.Key()))
 				continue
 			}
-
 			change, err := resource.After.Decode(assert.Value.Type())
 			if err != nil {
 				return nil, fmt.Errorf("Error happened while decoding planned resource %s : %v", assert.Name, err)
 			}
-
+			expect := findExpect(assert.Key(), s.Expects)
+			if expect != nil {
+				return nil, nil
+				change
+			}
 			assertDiags := checkAssert(cty.GetAttrPath(assert.Key()), assert.Value, change)
 			diags = diags.Append(assertDiags)
 		}
@@ -155,6 +163,7 @@ func findOuput(name string, outputs []*plans.OutputChangeSrc) *plans.OutputChang
 	}
 	return nil
 }
+
 func findResource(name string, resources []*plans.ResourceInstanceChangeSrc) *plans.ResourceInstanceChangeSrc {
 	for _, resource := range resources {
 		if name == resource.Addr.String() {
@@ -176,6 +185,32 @@ func findAttribute(key, value cty.Value) cty.Value {
 	}
 	return cty.NilVal
 }
+
+func findExpect(key string, expects[]*Expect) *Expect {
+	for _, expect := range expects {
+		if key == expect.Key() {
+			return expect
+		}
+	}
+	return nil
+}
+//func expectResource(resource *plans.ResourceInstanceChangeSrc, expects []*Expect) *plans.ResourceInstanceChangeSrc{
+//	for _, expect := range expects {
+//		resource := findResource(expect.Key(), plan.Changes.Resources)
+//		if resource == nil {
+//			diags = diags.Append(fmt.Errorf("Could not find resource %s in changes", expect.Key()))
+//			continue
+//		}
+//
+//		change, err := resource.After.Decode(expect.Data.Type())
+//		if err != nil {
+//			return nil, fmt.Errorf("Error happened while decoding planned resource %s : %v", expect.Name, err)
+//		}
+//		change = change
+//		//assertDiags := checkAssert(cty.GetAttrPath(expect.Key()), expect.Data, change)
+//		//diags = diags.Append(assertDiags)
+//	}
+//}
 
 func checkAssert(path cty.Path, expected, got cty.Value) tfdiags.Diagnostics {
 	var diags tfdiags.Diagnostics
